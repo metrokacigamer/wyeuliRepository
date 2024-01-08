@@ -1,9 +1,8 @@
 #include <iostream>
-#include <vector>
-#include <string>
 #include <algorithm>
 #include <functional>
-
+#include "corner.h"
+#include "side.h"
 enum class IncomingDiredction
 {
     up,
@@ -12,14 +11,14 @@ enum class IncomingDiredction
     right
 };
 
-template<class T>
-    int erase(std::vector<T>& c, T value)
-    {
-        auto it = std::remove(c.begin(), c.end(), value);
-        auto r = c.end() - it;
-        c.erase(it, c.end());
-        return r;
-    }
+template <class T>
+int erase(std::vector<T> &c, T value)
+{
+    auto it = std::remove(c.begin(), c.end(), value);
+    auto r = c.end() - it;
+    c.erase(it, c.end());
+    return r;
+}
 
 void PlusToSomeOther(std::vector<std::string> &, corner *, side *);
 
@@ -176,43 +175,43 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
 
     auto point = cornersAndSides.first[0];
     auto temp = point;
-    do
+    while (true)
     {
         auto innerBoundary = Boundary(arg, ReverseNextDir);
         point = cornersAndSides.first[0];
         temp = point;
-        auto linesToDraw = [&](std::vector<side*> sides)
+        auto linesToDraw = [&](std::vector<side *> sides)
         {
-            std::vector<side*> sidesToDraw;
+            std::vector<side *> sidesToDraw;
             side *previousLine{};
             point = temp;
             do
             {
                 auto line = *(std::find_if(point->sides.begin(), point->sides.end(), [=](side *arg)
-                                       { 
+                                           { 
                     bool IsBoundary = isBoundary(arg, innerBoundary);
                     return IsBoundary && arg != previousLine; }));
                 sidesToDraw.push_back(line);
                 point = (line->edges.first != point) ? line->edges.first : line->edges.second;
                 previousLine = line;
-            } while (point != temp);  
+            } while (point != temp);
             return sidesToDraw;
         };
         auto lines = linesToDraw(cornersAndSides.second);
-        
+
         side *previousLine{};
-        for(auto line: lines)
+        for (auto line : lines)
         {
             line->DrawLineInStringVec(figure);
-            if(needsFix(line->edges.first, line, previousLine))
+            if (needsFix(line->edges.first, line, previousLine))
                 PlusToSomeOther(figure, line->edges.first, line);
-            else if(needsFix(line->edges.second, line, previousLine))
+            else if (needsFix(line->edges.second, line, previousLine))
                 PlusToSomeOther(figure, line->edges.second, line);
 
             previousLine = line;
         }
-        
-        for(auto line: lines)
+
+        for (auto line : lines)
         {
             if (!line->IsBoundary)
             {
@@ -238,41 +237,56 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
                 delete line;
             }
         }
+        if (cornersAndSides.first.empty())
+            break;
+
         figure = FilterStringVec(figure);
         figureVec.push_back(StrVecToStr(figure));
         figure = BlankStringArray(arg);
-        arg = figure;
-        if (cornersAndSides.first.empty())
-        {
-            point = nullptr;
-            continue;
-        }
 
-        arg = BlankStringArray(arg2);
+
         for (auto i : cornersAndSides.second)
         {
             arg = i->DrawLineInStringVec(arg);
         }
         boundary = Boundary(arg, nextDirection);
-        for (auto i : cornersAndSides.second)
-        {
-            i->IsBoundary = isBoundary(i, boundary);
-        }
+        // for (auto i : cornersAndSides.second)
+        // {
+        //     i->IsBoundary = isBoundary(i, boundary);
+        // }
         point = cornersAndSides.first.front();
-    } while (point);
+    } 
     return figureVec;
 }
 
 int main()
 {
-    std::vector<std::string> shape{"+------------+",
-                                   "|            |",
-                                   "|            |",
-                                   "|            |",
-                                   "+------+-----+",
-                                   "|      |     |",
-                                   "|      |     |",
-                                   "+------+-----+"};
+    // std::vector<std::string> shape{"+-----+  +---+        +---+",
+    //                                "|     |  |   |        |   |",
+    //                                "|     |  |   +-----+  |   |",
+    //                                "|     |  |   |     |  |   |",
+    //                                "|     +--+   |     +--+   |",
+    //                                "|        |   |            |",
+    //                                "|     +--+   |  +-+       |",
+    //                                "|     |      |  | |       |",
+    //                                "+-----+--+---+--+ +-------+",
+    //                                "|     |  |   |            |",
+    //                                "|     |  |   |   +--+     |",
+    //                                "|     |  |   |   |  |     |",
+    //                                "+-----+--+---+---+  +-----+"};
+         std::vector<std::string> shape{"+-----+  +---+",
+                                        "|     |  |   |",
+                                        "|     |  |   +-----+",
+                                        "|     |  |         |",
+                                        "|     +--+         |",
+                                        "|        |         |",
+                                        "|     +--+   +-----+",
+                                        "|     |      |",
+                                        "+-----+--+---+",
+                                        "|     |  |   |",
+                                        "|     |  |   |",
+                                        "|     |  |   |",
+                                        "+-----+--+---+"};
     auto strArr = strArray(shape);
     for (auto i : strArr)
     {
@@ -573,23 +587,23 @@ std::string StrVecToStr(std::vector<std::string> &strVec)
 
 bool needsFix(corner *corner, side *side1, side *side2)
 {
-    if(!side1||!side2|| side1 == side2)
+    if (!side1 || !side2 || side1 == side2)
         return false;
     if (side1->IsHoris == side2->IsHoris)
     {
         bool hasSide1{std::any_of(corner->sides.begin(), corner->sides.end(), [side1](auto el)
-                               { return el == side1; })};
+                                  { return el == side1; })};
         bool hasSide2{std::any_of(corner->sides.begin(), corner->sides.end(), [side2](auto el)
-                               { return el == side2; })};
+                                  { return el == side2; })};
         return hasSide1 && hasSide2;
     }
 
     return false;
 }
 
-void PlusToSomeOther(std::vector<std::string>& arg, corner* corner, side *AssociatedSide)
+void PlusToSomeOther(std::vector<std::string> &arg, corner *corner, side *AssociatedSide)
 {
-    if(AssociatedSide->IsHoris)
+    if (AssociatedSide->IsHoris)
         arg[corner->coords.first][corner->coords.second] = '-';
     else
         arg[corner->coords.first][corner->coords.second] = '|';
