@@ -34,10 +34,9 @@ int main()
                                    "|     |  |   |",
                                    "|     |  |   |",
                                    "+-----+--+---+"};
-    auto strArr = strArray(shape);
+    auto strArr = BreakIntoPieces(shape);
     for (auto i : strArr)
     {
         std::cout << i << std::endl;
     }
 }
-

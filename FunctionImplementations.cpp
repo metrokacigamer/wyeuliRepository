@@ -29,9 +29,9 @@ std::vector<std::string> FillStringVector(std::vector<std::string> &strArr2)
     return strArr;
 }
 
-bool isBoundary(side *line, std::vector<std::pair<int, int>> BoundaryCoordinates)
+bool IsBoundary(side *line, std::vector<std::pair<int, int>> BoundaryCoordinates)
 {
-    bool IsBoundary{};
+    bool isBoundary{};
     size_t x1 = line->edges.first->coords.second;
     size_t x2 = line->edges.second->coords.second;
     size_t y1 = line->edges.first->coords.first;
@@ -39,7 +39,7 @@ bool isBoundary(side *line, std::vector<std::pair<int, int>> BoundaryCoordinates
     bool FirstXIsSmaller = x1 < x2;
     bool FirstYIsSmaller = y1 < y2;
     std::pair<int, int> Coords;
-    if (line->IsHoris)
+    if (line->isHoris)
     {
         if (FirstXIsSmaller)
             Coords = {y1, x1 + 1};
@@ -55,8 +55,8 @@ bool isBoundary(side *line, std::vector<std::pair<int, int>> BoundaryCoordinates
     }
     for (auto i : BoundaryCoordinates)
     {
-        IsBoundary = i.first == Coords.first && i.second == Coords.second ? true : IsBoundary;
-        if (IsBoundary)
+        isBoundary = i.first == Coords.first && i.second == Coords.second ? true : isBoundary;
+        if (isBoundary)
             return true;
     }
     return false;
@@ -82,7 +82,7 @@ std::pair<std::vector<corner *>, std::vector<side *>> Filter(std::vector<std::st
             {
                 auto var = new side();
                 pair.second.push_back(var);
-                pair.second.back()->IsHoris = true;
+                pair.second.back()->isHoris = true;
                 // pair->second.back()->IsBoundary = isBoundary(arg, j, i);
                 pair.second.back()->edges.first = pair.first.back();
                 pair.first.back()->sides.push_back(pair.second.back());
@@ -107,7 +107,7 @@ std::pair<std::vector<corner *>, std::vector<side *>> Filter(std::vector<std::st
             {
                 auto var = new side();
                 pair.second.push_back(var);
-                pair.second.back()->IsHoris = false;
+                pair.second.back()->isHoris = false;
                 auto edge1 = std::find_if(pair.first.begin(), pair.first.end(), [i, j](corner const *el)
                                           {
                     std::pair<int,int> tempPair(i - 1,j);
@@ -131,14 +131,14 @@ std::pair<std::vector<corner *>, std::vector<side *>> Filter(std::vector<std::st
     return pair;
 }
 
-std::vector<std::string> strArray(std::vector<std::string> &arg2)
+std::vector<std::string> BreakIntoPieces(std::vector<std::string> &arg2)
 {
     std::vector<std::string> arg = FillStringVector(arg2);
     auto cornersAndSides = Filter(arg);
-    auto boundary = Boundary(arg, nextDirection);
+    auto boundary = Boundary(arg, NextDirection);
     for (auto i : cornersAndSides.second)
     {
-        i->IsBoundary = isBoundary(i, boundary);
+        i->isBoundary = IsBoundary(i, boundary);
     }
     std::vector<std::string> figureVec;
     std::vector<std::string> figure{arg};
@@ -160,8 +160,8 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
             {
                 auto line = *(std::find_if(point->sides.begin(), point->sides.end(), [=](side *arg)
                                            { 
-                    bool IsBoundary = isBoundary(arg, innerBoundary);
-                    return IsBoundary && arg != previousLine; }));
+                    bool isBoundary = IsBoundary(arg, innerBoundary);
+                    return isBoundary && arg != previousLine; }));
                 sidesToDraw.push_back(line);
                 point = (line->edges.first != point) ? line->edges.first : line->edges.second;
                 previousLine = line;
@@ -174,9 +174,9 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
         for (auto line : lines)
         {
             line->DrawLineInStringVec(figure);
-            if (needsFix(line->edges.first, line, previousLine))
+            if (NeedsFix(line->edges.first, line, previousLine))
                 PlusToSomeOther(figure, line->edges.first, line);
-            else if (needsFix(line->edges.second, line, previousLine))
+            else if (NeedsFix(line->edges.second, line, previousLine))
                 PlusToSomeOther(figure, line->edges.second, line);
 
             previousLine = line;
@@ -184,9 +184,9 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
 
         for (auto line : lines)
         {
-            if (!line->IsBoundary)
+            if (!line->isBoundary)
             {
-                line->IsBoundary = true;
+                line->isBoundary = true;
             }
             else
             {
@@ -212,14 +212,14 @@ std::vector<std::string> strArray(std::vector<std::string> &arg2)
             break;
 
         figure = FilterStringVec(figure);
-        figureVec.push_back(StrVecToStr(figure));
+        figureVec.push_back(JoinStrings(figure));
         figure = BlankStringArray(arg);
 
         for (auto i : cornersAndSides.second)
         {
             arg = i->DrawLineInStringVec(arg);
         }
-        boundary = Boundary(arg, nextDirection);
+        boundary = Boundary(arg, NextDirection);
 
         point = cornersAndSides.first.front();
     }
@@ -258,7 +258,7 @@ std::vector<std::string> FilterStringVec(std::vector<std::string> &arg)
 
 void ReverseNextDir(std::vector<std::string> &arg, std::pair<int, int> previousPoint, size_t &x, size_t &y)
 {
-    auto dir = incomingDirection(previousPoint, x, y);
+    auto dir = IncomingDirection(previousPoint, x, y);
     bool hasPointsAbove{};
     if (y - 1 != std::string::npos)
     {
@@ -352,9 +352,9 @@ void ReverseNextDir(std::vector<std::string> &arg, std::pair<int, int> previousP
     }
 }
 
-void nextDirection(std::vector<std::string> &arg, std::pair<int, int> previousPoint, size_t &x, size_t &y)
+void NextDirection(std::vector<std::string> &arg, std::pair<int, int> previousPoint, size_t &x, size_t &y)
 {
-    auto dir = incomingDirection(previousPoint, x, y);
+    auto dir = IncomingDirection(previousPoint, x, y);
     bool hasPointsAbove{};
     if (y - 1 != std::string::npos)
     {
@@ -481,7 +481,7 @@ std::vector<std::pair<int, int>> Boundary(std::vector<std::string> &arg, std::fu
     return BoundaryCoordinates;
 }
 
-IncomingDiredction incomingDirection(std::pair<int, int> previousPoint, size_t x, size_t y)
+IncomingDiredction IncomingDirection(std::pair<int, int> previousPoint, size_t x, size_t y)
 {
     if (previousPoint.first < y)
         return IncomingDiredction::up;
@@ -505,7 +505,7 @@ std::vector<std::string> &BlankStringArray(std::vector<std::string> &vecArr)
     return vecArr;
 }
 
-std::string StrVecToStr(std::vector<std::string> &strVec)
+std::string JoinStrings(std::vector<std::string> &strVec)
 {
     std::string str;
     for (auto i : strVec)
@@ -517,11 +517,11 @@ std::string StrVecToStr(std::vector<std::string> &strVec)
     return str;
 }
 
-bool needsFix(corner *corner, side *side1, side *side2)
+bool NeedsFix(corner *corner, side *side1, side *side2)
 {
     if (!side1 || !side2 || side1 == side2)
         return false;
-    if (side1->IsHoris == side2->IsHoris)
+    if (side1->isHoris == side2->isHoris)
     {
         bool hasSide1{std::any_of(corner->sides.begin(), corner->sides.end(), [side1](auto el)
                                   { return el == side1; })};
@@ -535,7 +535,7 @@ bool needsFix(corner *corner, side *side1, side *side2)
 
 void PlusToSomeOther(std::vector<std::string> &arg, corner *corner, side *AssociatedSide)
 {
-    if (AssociatedSide->IsHoris)
+    if (AssociatedSide->isHoris)
         arg[corner->coords.first][corner->coords.second] = '-';
     else
         arg[corner->coords.first][corner->coords.second] = '|';

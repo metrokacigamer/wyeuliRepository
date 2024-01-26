@@ -4,7 +4,7 @@
     {
         arg[this->edges.first->coords.first][this->edges.first->coords.second] = '+'; // this->edges.first.;
         arg[this->edges.second->coords.first][this->edges.second->coords.second] = '+';
-        if (this->IsHoris)
+        if (this->isHoris)
         {
             bool SecondIsGreaterThanFirst = (this->edges.first->coords.second < this->edges.second->coords.second);
             size_t x1{SecondIsGreaterThanFirst ? this->edges.first->coords.second + 1 : this->edges.second->coords.second + 1};
