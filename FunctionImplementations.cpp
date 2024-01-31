@@ -182,6 +182,10 @@ std::vector<std::string> BreakIntoPieces(std::vector<std::string> &arg2)
             previousLine = line;
         }
 
+        figure = FilterStringVec(figure);
+        figureVec.push_back(JoinStrings(figure));
+        figure = BlankStringArray(arg);
+        
         for (auto line : lines)
         {
             if (!line->isBoundary)
@@ -211,9 +215,7 @@ std::vector<std::string> BreakIntoPieces(std::vector<std::string> &arg2)
         if (cornersAndSides.first.empty())
             break;
 
-        figure = FilterStringVec(figure);
-        figureVec.push_back(JoinStrings(figure));
-        figure = BlankStringArray(arg);
+
 
         for (auto i : cornersAndSides.second)
         {
