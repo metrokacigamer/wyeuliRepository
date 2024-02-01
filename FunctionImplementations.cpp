@@ -451,26 +451,32 @@ void NextDirection(std::vector<std::string> &arg, std::pair<int, int> previousPo
 std::vector<std::pair<int, int>> Boundary(std::vector<std::string> &arg, std::function<void(std::vector<std::string> &, std::pair<int, int>, size_t &, size_t &)> nextMove, size_t x, size_t y, std::pair<int, int> startingCoord, std::pair<int, int> previousCoord)
 {
     std::vector<std::pair<int, int>> BoundaryCoordinates;
-    size_t i{};
-    if (x == 0 && y == 0)
     {
-        auto x_var = arg[i].find_first_not_of(' ');
-        while (x_var == std::string::npos)
+        size_t i{};
+        if (x == 0 && y == 0)
         {
-            ++i;
-            x_var = arg[i].find_first_not_of(' ');
+            auto x_var = arg[i].find_first_not_of(' ');
+            while (x_var == std::string::npos)
+            {
+                ++i;
+                x_var = arg[i].find_first_not_of(' ');
+            }
+            startingCoord.first = i;
+            startingCoord.second = x_var;
+            y = i;
+            x = x_var;
+            previousCoord = {y, x};
+            BoundaryCoordinates.push_back({y, x});
         }
-        startingCoord.first = i;
-        startingCoord.second = x_var;
-        y = i;
-        x = x_var;
-        previousCoord = {y, x};
-        BoundaryCoordinates.push_back({y, x});
     }
-    auto temp_x = x;
-    auto temp_y = y;
-    nextMove(arg, previousCoord, x, y);
-    previousCoord = {temp_y, temp_x};
+
+    {
+        auto temp_x = x;
+        auto temp_y = y;
+        nextMove(arg, previousCoord, x, y);
+        previousCoord = {temp_y, temp_x};
+    }
+
     BoundaryCoordinates.push_back({y, x});
 
     if ((BoundaryCoordinates.end() - 1)->first != startingCoord.first || (BoundaryCoordinates.end() - 1)->second != startingCoord.second)
